@@ -1,0 +1,1 @@
+MODEL;MODEL_DESCRIPTION;FORECAST_HORIZON;PAST_HISTORY;BATCH_SIZE;EPOCHS;mse;rmse;nrmse;mae;wape;mpe;mape;mdape;smape;smdape;mase;rmspe;rmsse;mre;rae;mrae;std_ae;std_ape;val_mse;val_rmse;val_nrmse;val_mae;val_wape;val_mpe;val_mape;val_mdape;val_smape;val_smdape;val_mase;val_rmspe;val_rmsse;val_mre;val_rae;val_mrae;val_std_ae;val_std_ape;loss;val_loss;Execution_time;Device

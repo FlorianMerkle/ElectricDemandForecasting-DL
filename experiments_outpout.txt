@@ -1,0 +1,6 @@
+None
+[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+CURRENT INDEX 6
+(245376,) 220838
+(220527, 288, 1) (220527, 24) 
+ (24515, 288, 1) (24515, 24)
