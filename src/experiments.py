@@ -2,21 +2,27 @@ import itertools
 import numpy as np
 import tensorflow as tf
 from tqdm import tqdm
-from models import lstm, cnn, mlp, cldnn, tcn
+from models import lstm, tcn
 from utils import auxiliary_plots, metrics
 from utils.print_functions import notify_slack
 from preprocessing import normalization, data_generation
 import time
+import datetime
 
 METRICS = ['mse', 'rmse', 'nrmse', 'mae', 'mpe', 'mape', 'mdape', 'smape', 'smdape',
            'mase', 'rmspe', 'rmsse', 'mre', 'rae', 'mrae', 'std_ae', 'std_ape']
 
 TCN_PARAMS = {
-    'nb_filters': [32, 64, 128],
-    'kernel_size': [2, 3, 4, 5],
-    'nb_stacks': [1, 2, 3, 4],
-    'dilations': [[1, 2, 4], [1, 2, 4, 8], [1, 2, 4, 8, 16], [1, 2, 4, 8, 16, 32], [1, 2, 4, 8, 16, 32, 64],
-                  [1, 3, 6], [1, 3, 6, 12], [1, 5, 7], [1, 5, 7, 14]],
+    # 'nb_filters': [32, 64, 128],
+    # 'kernel_size': [2, 3, 4, 5],
+    # 'nb_stacks': [1, 2, 3, 4],
+    # 'dilations': [[1, 2, 4], [1, 2, 4, 8], [1, 2, 4, 8, 16], [1, 2, 4, 8, 16, 32], [1, 2, 4, 8, 16, 32, 64],
+    #               [1, 3, 6], [1, 3, 6, 12], [1, 5, 7], [1, 5, 7, 14]],
+    # 'dropout_rate': [0],
+    'nb_filters': [128],
+    'kernel_size': [6],
+    'nb_stacks': [2],
+    'dilations': [[1, 3, 6, 12,24]],
     'dropout_rate': [0],
 }
 LSTM_PARAMS = {
@@ -28,7 +34,7 @@ LSTM_PARAMS = {
 
 def run_experiments(train_file_name, test_file_name, result_file_name, forecast_horizon, past_history_ls, batch_size_ls,
                     epochs_ls, tcn_params=TCN_PARAMS, lstm_params=LSTM_PARAMS, gpu_number=None, metrics_ls=METRICS,
-                    buffer_size=1000, seed=1, show_plots=False, webhook=None, validation_size=0.2):
+                    buffer_size=1000, seed=1, show_plots=False, webhook=None, validation_size=0.1):
     tf.random.set_seed(seed)
     np.random.seed(seed)
 
@@ -127,15 +133,17 @@ def run_experiments(train_file_name, test_file_name, result_file_name, forecast_
         for model_name, (model_function, params) in tqdm(model_list.items(), position=1):
             index_2 += 1
             i += 1
-            if i <= current_index:
-                continue
+            #if i <= current_index:
+            #    continue
             start = time.time()
             model = model_function(*params)
             print(model.summary())
-
+            ts = str(datetime.datetime.fromtimestamp(time.time()))[5:-7].replace(' ','_')
+            save_best = tf.keras.callbacks.ModelCheckpoint(filepath=f'files/models/best-model-bs-{batch_size}-ph-{past_history}-{ts}.ckpt',save_best_only=True, monitor='loss')
             # Train the model
             history = model.fit(train_data, epochs=epochs,
                                 steps_per_epoch=steps_per_epoch,
+                                callbacks=[save_best],
                                 validation_data=val_data, validation_steps=validation_steps)
 
             # Plot training and evaluation loss evolution
